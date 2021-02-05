@@ -6,8 +6,7 @@ Follow the steps below and apply them to each sample, eventually resulting in th
 
 ![](plot.png)
 
-From a physics point of view the analysis has quite some flaws, but you see that data and simulation (very roughly) fits together.
-Remember that the goal is not to have the a physically sane result but we look for the experience to get there technically ;)
+From a physics point of view the analysis has quite some flaws, but you see that data and simulation (very roughly) fit together. The most obvious problem is a missing data-driven estimation of the QCD background.
 
 Also note that you can find an example solution in the repository.
 
@@ -61,9 +60,10 @@ For the `Tau_*` collections:
 Select the muon and the tau using following rules.
 
 - Look only at muon-tau pairs with a `deltar>0.5` (see `ROOT::Math::VectorUtil::DeltaR`)
-- Take the tau with the best (smallest) isolation (see the `Tau_relIso_all` collection)
+- The muon and the tau must have opposite charge (see `Muon_charge` and `Tau_charge`).
 - Take the muon with the highest pt (see the `Muon_pt` collection)
-- For simplicity, we look first for the best isolated tau and then we search a suitable muon. Repeat with the next best tau if no muon fits the `deltar` requirement for the first tau.
+- Take the tau with the best (smallest) isolation (see the `Tau_relIso_all` collection)
+- For simplicity, we look first for the muon with the highest pt and then search for a suitable tau. Repeat with the next best muon if no tau fits the `deltar` and charge requirement for the current best muon.
 - Skip the event if no pair can be found.
 
 ## Event weights

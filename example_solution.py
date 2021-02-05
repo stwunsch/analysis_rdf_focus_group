@@ -1,4 +1,5 @@
 import ROOT
+ROOT.gROOT.SetBatch(True)
 ROOT.EnableImplicitMT()
 
 
@@ -12,7 +13,7 @@ def selections(df):
 
     # Add new columns for the good muons and taus
     for lepton in ['Muon', 'Tau']:
-        cols = ['pt', 'eta', 'phi', 'mass']
+        cols = ['pt', 'eta', 'phi', 'mass', 'charge']
         if lepton == 'Tau':
             cols.append('relIso_all')
         for col in cols:
@@ -23,18 +24,19 @@ def selections(df):
 
 # Jit a function to find the muon-tau pair
 ROOT.gInterpreter.Declare('''
-using Vec_t = const ROOT::RVec<float>&;
+using VecF_t = const ROOT::RVec<float>&;
+using VecI_t = const ROOT::RVec<int>&;
 vector<int>
 findMuonTauPair(
-    Vec_t Muon_pt, Vec_t Muon_eta, Vec_t Muon_phi,
-    Vec_t Tau_relIso_all, Vec_t Tau_eta, Vec_t Tau_phi)
+    VecF_t Muon_pt, VecF_t Muon_eta, VecF_t Muon_phi, VecI_t Muon_charge,
+    VecF_t Tau_relIso_all, VecF_t Tau_eta, VecF_t Tau_phi, VecI_t Tau_charge)
 {
     using namespace ROOT::VecOps;
     auto Muon_idx = Reverse(Argsort(Muon_pt)); // max to min
     auto Tau_idx = Argsort(Tau_relIso_all); // min to max
     for (int Muon_i : Muon_idx) {
         for (int Tau_i: Tau_idx) {
-            if (DeltaR(Muon_eta[Muon_i], Tau_eta[Tau_i], Muon_phi[Muon_i], Tau_phi[Tau_i]) > 0.5) {
+            if (DeltaR(Muon_eta[Muon_i], Tau_eta[Tau_i], Muon_phi[Muon_i], Tau_phi[Tau_i]) > 0.5 && Muon_charge[Muon_i] * Tau_charge[Tau_i] < 0) {
                 return {Muon_i, Tau_i};
             }
         }
@@ -47,7 +49,7 @@ findMuonTauPair(
 
 # Find the muon tau pair with the function jitted above
 def find_pair(df):
-    return df.Define('idxs', 'findMuonTauPair(goodMuon_pt, goodMuon_eta, goodMuon_phi, goodTau_relIso_all, goodTau_eta, goodTau_phi)')\
+    return df.Define('idxs', 'findMuonTauPair(goodMuon_pt, goodMuon_eta, goodMuon_phi, goodMuon_charge, goodTau_relIso_all, goodTau_eta, goodTau_phi, goodTau_charge)')\
              .Filter('idxs.size() == 2');
 
 
