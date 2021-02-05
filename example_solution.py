@@ -3,12 +3,14 @@ ROOT.EnableImplicitMT()
 
 
 def selections(df):
+    # Apply the baseline selection and the selection on the muon and tau collections
     df = df.Filter("HLT_IsoMu17_eta2p1_LooseIsoPFTau20 == true && nMuon > 0 && nTau > 0")\
            .Define("goodMuons", "abs(Muon_eta) < 2.1 && Muon_pt > 17 && Muon_tightId == true")\
            .Filter("Sum(goodMuons) > 0")\
            .Define("goodTaus", "Tau_charge != 0 && abs(Tau_eta) < 2.3 && Tau_pt > 20 && Tau_idDecayMode == true && Tau_idIsoTight == true && Tau_idAntiEleTight == true && Tau_idAntiMuTight == true")\
            .Filter("Sum(goodTaus) > 0")
 
+    # Add new columns for the good muons and taus
     for lepton in ['Muon', 'Tau']:
         cols = ['pt', 'eta', 'phi', 'mass']
         if lepton == 'Tau':
@@ -19,6 +21,7 @@ def selections(df):
     return df
 
 
+# Jit a function to find the muon-tau pair
 ROOT.gInterpreter.Declare('''
 using Vec_t = const ROOT::RVec<float>&;
 vector<int>
@@ -42,11 +45,13 @@ findMuonTauPair(
 ''')
 
 
+# Find the muon tau pair with the function jitted above
 def find_pair(df):
     return df.Define('idxs', 'findMuonTauPair(goodMuon_pt, goodMuon_eta, goodMuon_phi, goodTau_relIso_all, goodTau_eta, goodTau_phi)')\
              .Filter('idxs.size() == 2');
 
 
+# Jit a function to compute the invariant mass
 ROOT.gInterpreter.Declare('''
 float computeInvariantMass(float pt_1, float eta_1, float phi_1, float mass_1, float pt_2, float eta_2, float phi_2, float mass_2) {
     auto p1 = ROOT::Math::PtEtaPhiMVector(pt_1, eta_1, phi_1, mass_1);
@@ -56,10 +61,12 @@ float computeInvariantMass(float pt_1, float eta_1, float phi_1, float mass_1, f
 ''')
 
 
+# Compute the invariant mass with the function jitted above
 def compute_mass(df):
     return df.Define('mass', 'computeInvariantMass(goodMuon_pt[idxs[0]], goodMuon_eta[idxs[0]], goodMuon_phi[idxs[0]], goodMuon_mass[idxs[0]], goodTau_pt[idxs[1]], goodTau_eta[idxs[1]], goodTau_phi[idxs[1]], goodTau_mass[idxs[1]])')
 
 
+# Add the event weights based on the sample being simulation or data
 def event_weight(df, sample, xsec, num_events, lumi=1.1 * 1000):
     if 'Run2012' in sample:
         return df.Define('weight', '1.0')
@@ -67,11 +74,12 @@ def event_weight(df, sample, xsec, num_events, lumi=1.1 * 1000):
         return df.Define('weight', '{} * {} / {}'.format(lumi, xsec, num_events))
 
 
+# Main analysis loop over all samples with reading the info from metadata.csv and plotting
 def main():
     # Read sample names, xsecs and number of events per sample
     samples = []
-    with open('skim.csv') as f:
-        for line in f.readlines():
+    with open('metadata.csv') as f:
+        for line in f.readlines()[1:]:
             sample, xsec, num = line.strip().split(',')
             print('Sample {}: {}, {}'.format(sample, xsec, num))
             samples.append((sample, float(xsec), float(num)))
