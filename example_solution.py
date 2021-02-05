@@ -87,7 +87,7 @@ def main():
     # Run analysis
     hists = []
     for sample, xsec, num_events in samples:
-        df = ROOT.RDataFrame('Events', 'data/' + sample + '.root')
+        df = ROOT.RDataFrame('Events', 'samples/' + sample + '.root')
         df = selections(df)
         df = find_pair(df)
         df = compute_mass(df)

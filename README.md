@@ -13,7 +13,7 @@ Also note that you can find an example solution in the repository.
 
 ## Preparation
 
-Download the files executing the `download.sh` script (you'll need `xrdcp`!). The samples will be placed in the `data/` folder with the following names:
+Download the files executing the `download.sh` script (you'll need `xrdcp`!). The samples will be placed in the `samples/` folder with the following names:
 
 Simulation samples:
 
