@@ -77,3 +77,13 @@ Take the identified pair of muon and tau and compute the invariant mass of the s
 ## Plot data versus simulation
 
 Take all simulations of the background processes, stack them, and draw in a single plot the stacked simulations and the stacked data histograms. Use the computed invariant mass as the variable and plot from 20 to 120 (it's in GeV) using 5 GeV steps.
+
+## Systematic uncertainties
+
+An additional learning goal is trying to vary some of the analysis steps and produce additional histograms representing the impact of systematic uncertainties. Following variations could be a good starting point:
+
+- Change cuts for the selection of muons and taus (like eta or pt requirements)
+- Apply a different weight for a specific simulation sample
+- Change the input sample for a specific process (not directly possible here since we don't have additional simulations, but you can just duplicate a file if you like)
+
+Note that you want to run the varied graphs in the same event loop than the nominal analysis!
