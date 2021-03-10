@@ -29,6 +29,10 @@ Data samples:
 
 Each sample has a `TTree` called `Events` following the NanoAOD conventions.
 
+## Requirements
+
+Best is to use ROOT master, but feel free to source ROOT 6.22 from CVMFS (taken from the LCG 99 view, see the `setup.sh` script).
+
 ## Selection
 
 Following lists tell you for the `Muon_*` and `Tau_*` collections the baseline selection you have to apply so reduce the collections to the good candidates.
