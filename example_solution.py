@@ -97,7 +97,8 @@ def main():
         h = df.Histo1D(('', '', 20, 20, 120), 'mass', 'weight')
         hists.append(h)
 
-    ROOT.RDF.RunGraphs(hists)
+    # Enable running the event loops concurrently, requires ROOT 6.24
+    # ROOT.RDF.RunGraphs(hists)
 
     # Plot
     data = None
